@@ -65,6 +65,9 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+# Generated product sketches (cached from the furniture shop event API)
+furniture_buyer_lab/static/product_sketches/
+
 # Scrapy stuff:
 .scrapy
 

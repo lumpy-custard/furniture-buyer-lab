@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_visual %}
+{% block content %}
+<p class="pdp-back">
+  <a href="{{ url_for('main.home', q=search, category=selected_category) }}">&larr; Back to shop</a>
+</p>
+<div class="pdp">
+  <div class="card pdp-visual-card">
+    <div class="pdp-visual">{{ product_visual(product, detailed=True) }}</div>
+  </div>
+  <div class="card pdp-info">
+    <span class="badge">{{ product.category }}</span>
+    <h1 class="pdp-name">{{ product.name }}</h1>
+    <p class="pdp-description">{{ product.description }}</p>
+    <p class="pdp-price">${{ "%.2f"|format(product.price) }}</p>
+    {% if product.available_quantity <= 0 %}
+    <span class="badge badge-out">Out of stock</span>
+    {% elif product.available_quantity < 5 %}
+    <span class="badge badge-low">Only {{ product.available_quantity }} left</span>
+    {% else %}
+    <p class="product-stock">In stock: {{ product.available_quantity }}</p>
+    {% endif %}
+    <form class="product-form" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" method="post">
+      <input type="hidden" name="q" value="{{ search }}">
+      <input type="hidden" name="category" value="{{ selected_category }}">
+      <input class="input input-qty" type="number" name="quantity" value="1" min="1" max="{{ product.available_quantity }}" {% if product.available_quantity < 1 %}disabled{% endif %}>
+      <button class="btn btn-primary" type="submit" {% if product.available_quantity < 1 %}disabled{% endif %}>
+        {{ "Out of stock" if product.available_quantity < 1 else "Add to cart" }}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

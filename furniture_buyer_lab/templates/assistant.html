@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="assistant-hero">
+  <h1 class="assistant-hero-title">Welcome to the new way to shop</h1>
+  <svg class="assistant-hero-sketch-underline" viewBox="0 0 260 14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <path d="M4 8c30-6 60 4 90-2s60-6 90 0 60 2 72-4"/>
+  </svg>
+  <p class="assistant-hero-subtitle">Tell {{ assistant_name }} the room and budget - or just ask for an item.</p>
+  <a class="btn btn-ghost assistant-downgrade" href="{{ url_for('main.home') }}">Use the traditional shop instead</a>
+</div>
+
+<div class="card assistant-card">
+  <div class="chat-log" id="chat-log">
+    {% if not history %}
+    <div class="chat-message chat-assistant">
+      <p class="chat-name">{{ assistant_name }}</p>
+      <div class="chat-bubble">Hi, I'm {{ assistant_name }}. What are we shopping for today?</div>
+    </div>
+    {% endif %}
+    {% for message in history %}
+    <div class="chat-message chat-{{ message.role }}">
+      {% if message.role == "assistant" %}<p class="chat-name">{{ assistant_name }}</p>{% endif %}
+      <div class="chat-bubble">{{ message.text }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="chat-status" id="chat-status" hidden></div>
+  <form class="chat-input-row" id="chat-form" action="{{ url_for('main.assistant_chat') }}" method="post">
+    <input class="input" type="text" id="chat-input" name="message" placeholder="Ask about a room, a budget, or a specific item..." autocomplete="off" required>
+    <button class="btn btn-primary" type="submit">Send</button>
+  </form>
+  <form action="{{ url_for('main.assistant_reset') }}" method="post" class="assistant-reset-form">
+    <button class="btn btn-ghost" type="submit">Reset conversation</button>
+  </form>
+</div>
+
+<script>window.ASSISTANT_NAME = {{ assistant_name|tojson }};</script>
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+{% endblock %}

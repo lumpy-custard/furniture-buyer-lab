@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Furniture Buyer Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Architects+Daughter&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    (function () {
+      var STORAGE_KEY = "theme";
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <nav class="topbar">
+        {% if current_user.is_authenticated %}
+        <div class="brand-menu">
+          <button type="button" class="brand-trigger" id="brand-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 10c0-3 2-5 5-5h6c3 0 5 2 5 5"/>
+              <rect x="3" y="10" width="18" height="7" rx="2"/>
+              <path d="M4 17v2M20 17v2"/>
+            </svg>
+          </button>
+          <div class="brand-panel" id="brand-panel" hidden>
+            <a class="profile-menu-item" href="{{ url_for('main.assistant_home') }}">Assistant</a>
+            <a class="profile-menu-item" href="{{ url_for('main.home') }}">Shop</a>
+          </div>
+        </div>
+        {% else %}
+        <a class="brand" href="{{ url_for('auth.login') }}" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 10c0-3 2-5 5-5h6c3 0 5 2 5 5"/>
+            <rect x="3" y="10" width="18" height="7" rx="2"/>
+            <path d="M4 17v2M20 17v2"/>
+          </svg>
+        </a>
+        {% endif %}
+      <div class="topbar-actions">
+        {% if current_user.is_authenticated %}
+        <span class="topbar-budget">
+          Budget: {% if nav_balance is not none %}${{ "{:,.0f}".format(nav_balance) }}{% else %}—{% endif %}
+        </span>
+        <a class="btn btn-ghost" href="{{ url_for('main.view_cart') }}">Cart{% if cart_item_count %}<span class="cart-count">{{ cart_item_count }}</span>{% endif %}</a>
+        <div class="profile-menu">
+          <button type="button" class="btn btn-ghost profile-trigger" id="profile-trigger" aria-haspopup="true" aria-expanded="false">
+            <span class="profile-avatar">{{ current_user.name[:1]|upper }}</span>
+            <span class="profile-trigger-name">{{ current_user.name }}</span>
+          </button>
+          <div class="profile-panel" id="profile-panel" hidden>
+            <div class="profile-panel-header">
+              <div class="profile-panel-name">{{ current_user.name }}</div>
+              <div class="profile-panel-email">{{ current_user.email }}</div>
+            </div>
+            <a class="profile-menu-item" href="{{ url_for('main.order_history') }}">Order history</a>
+            <button type="button" class="profile-menu-item" id="theme-toggle"></button>
+            <a class="profile-menu-item profile-menu-item-danger" href="{{ url_for('auth.logout') }}">Logout</a>
+          </div>
+        </div>
+        {% else %}
+        <button type="button" class="btn btn-ghost theme-toggle" id="theme-toggle" aria-label="Toggle color theme"></button>
+        {% endif %}
+      </div>
+    </nav>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
+</body>
+</html>

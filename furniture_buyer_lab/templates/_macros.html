@@ -1,0 +1,8 @@
+{% macro product_visual(product, detailed=False) %}
+{% set photo_url = product_sketch_image(product) %}
+{% if photo_url %}
+<img class="product-photo-sketch" src="{{ photo_url }}" alt="{{ product.name }}">
+{% else %}
+{{ product_sketch(product, detailed=detailed) }}
+{% endif %}
+{% endmacro %}

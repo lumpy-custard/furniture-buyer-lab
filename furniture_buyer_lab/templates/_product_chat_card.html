@@ -1,0 +1,10 @@
+{% from "_macros.html" import product_visual %}
+<div class="product-card-chat">
+  <div class="product-card-chat-visual">{{ product_visual(product) }}</div>
+  <div class="product-card-chat-info">
+    <span class="badge">{{ product.category }}</span>
+    <p class="product-card-chat-name">{{ product.name }}</p>
+    <p class="product-card-chat-price">${{ "%.2f"|format(product.price) }}</p>
+    <p class="product-card-chat-desc">{{ product.description }}</p>
+  </div>
+</div>

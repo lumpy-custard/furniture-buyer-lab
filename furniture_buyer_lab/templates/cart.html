@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_visual %}
+{% block content %}
+<h2 class="section-title">Your cart</h2>
+{% if lines %}
+<div class="card">
+  <table class="table-modern">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Unit price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in lines %}
+      <tr>
+        <td>
+          <div class="cart-line-product">
+            <div class="cart-thumb">{{ product_visual(line.product) }}</div>
+            <div>
+              {{ line.product.name }}
+              {% if line.insufficient_stock %}
+              <div class="product-stock">Only {{ line.product.available_quantity }} left — quantity reduced.</div>
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td>${{ "%.2f"|format(line.product.price) }}</td>
+        <td>
+          <form class="product-form" action="{{ url_for('main.update_cart_item', product_id=line.product.id) }}" method="post">
+            <input class="input input-qty" type="number" name="quantity" value="{{ line.quantity }}" min="1" max="{{ line.product.available_quantity }}">
+            <button class="btn btn-ghost" type="submit">Update</button>
+          </form>
+        </td>
+        <td>${{ "%.2f"|format(line.subtotal) }}</td>
+        <td>
+          <form action="{{ url_for('main.remove_cart_item', product_id=line.product.id) }}" method="post">
+            <button class="btn btn-ghost" type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="cart-summary">
+    <div class="order-total">Total: ${{ "%.2f"|format(total) }}</div>
+    <form action="{{ url_for('main.checkout') }}" method="post">
+      <button class="btn btn-primary" type="submit">Place order</button>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="card">
+  <p class="empty-state">Your cart is empty.</p>
+  <p class="auth-footer"><a href="{{ continue_url }}">Continue shopping</a></p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="section-title">Order history</h2>
+{% if orders %}
+{% for order in orders %}
+<div class="card">
+  <div class="order-card-header">
+    <div>
+      <div class="order-id">Order #{{ order.id }}</div>
+      <div class="order-meta">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }} &middot; <span class="status status-{{ order.status }}">{{ order.status }}</span></div>
+    </div>
+    <div class="order-actions">
+      <div class="order-total">${{ "%.2f"|format(order.total_price) }}</div>
+      {% if order.status == "completed" %}
+      <form action="{{ url_for('main.return_order', order_id=order.id) }}" method="post">
+        <button class="btn btn-ghost" type="submit">Return order</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  <table class="table-modern">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Unit price</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items %}
+      <tr>
+        <td>{{ item.product.name if item.product else "Product no longer available" }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ "%.2f"|format(item.unit_price) }}</td>
+        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% else %}
+<div class="card">
+  <p class="empty-state">No orders yet.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_visual %}
+{% block content %}
+  <div class="card">
+    <h2 class="section-title">Product catalogue</h2>
+    <p class="catalogue-count">{{ total_count }} product{{ "" if total_count == 1 else "s" }}</p>
+    <form class="search-bar" method="get" action="{{ url_for('main.home') }}">
+      <input class="input" type="text" name="q" value="{{ search }}" placeholder="Search products...">
+      <select class="input" name="category">
+        <option value="">All categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary" type="submit">Search</button>
+      {% if search or selected_category %}
+      <a class="btn btn-ghost" href="{{ url_for('main.home') }}">Clear</a>
+      {% endif %}
+    </form>
+    {% if catalogue_error %}
+    <p class="empty-state">{{ catalogue_error }}</p>
+    {% elif not catalogue_items %}
+    <p class="empty-state">No products match your search.</p>
+    {% endif %}
+    <div class="product-grid product-grid-compact">
+      {% for item in catalogue_items %}
+      <div class="product-card product-card-compact">
+        {% if item.local %}
+        <a class="product-visual-link" href="{{ url_for('main.product_detail', product_id=item.local.id, q=search, category=selected_category) }}">
+          <div class="product-visual">{{ product_visual(item.local) }}</div>
+        </a>
+        {% else %}
+        <div class="product-visual"></div>
+        {% endif %}
+        <div class="product-info">
+          <span class="badge">{{ item.category }}</span>
+          {% if item.local %}
+          <a class="product-name-link" href="{{ url_for('main.product_detail', product_id=item.local.id, q=search, category=selected_category) }}">
+            <p class="product-name">{{ item.name }}</p>
+          </a>
+          {% else %}
+          <p class="product-name">{{ item.name }}</p>
+          {% endif %}
+          <p class="product-price">${{ "%.2f"|format(item.price) }}</p>
+          {% if not item.local %}
+          <span class="badge badge-out">Currently unavailable</span>
+          {% elif item.local.available_quantity <= 0 %}
+          <span class="badge badge-out">Out of stock</span>
+          {% elif item.local.available_quantity < 5 %}
+          <span class="badge badge-low">Only {{ item.local.available_quantity }} left</span>
+          {% endif %}
+          <form class="product-form" action="{{ url_for('main.add_to_cart', product_id=item.local.id if item.local else 0) }}" method="post">
+            <input type="hidden" name="q" value="{{ search }}">
+            <input type="hidden" name="category" value="{{ selected_category }}">
+            <input type="hidden" name="quantity" value="1">
+            <button class="btn btn-primary btn-block" type="submit" {% if not item.local or item.local.available_quantity < 1 %}disabled{% endif %}>
+              {{ "Out of stock" if item.local and item.local.available_quantity < 1 else ("Add to cart" if item.local else "Unavailable") }}
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="Pagination">
+      {% if page > 1 %}
+      <a class="btn btn-ghost pagination-link" href="{{ url_for('main.home', q=search, category=selected_category, page=page-1) }}">Prev</a>
+      {% else %}
+      <span class="btn btn-ghost pagination-link pagination-disabled">Prev</span>
+      {% endif %}
+
+      {% for p in pagination_pages %}
+        {% if p is none %}
+        <span class="pagination-ellipsis">&hellip;</span>
+        {% elif p == page %}
+        <span class="pagination-link pagination-active">{{ p }}</span>
+        {% else %}
+        <a class="pagination-link" href="{{ url_for('main.home', q=search, category=selected_category, page=p) }}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page < total_pages %}
+      <a class="btn btn-ghost pagination-link" href="{{ url_for('main.home', q=search, category=selected_category, page=page+1) }}">Next</a>
+      {% else %}
+      <span class="btn btn-ghost pagination-link pagination-disabled">Next</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+  </div>
+{% endblock %}
